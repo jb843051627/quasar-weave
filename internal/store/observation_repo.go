@@ -2,12 +2,31 @@ package store
 
 import (
 	"context"
+	"database/sql"
+	"encoding/json"
 	"fmt"
 	"sort"
 	"time"
 
 	"github.com/jb843051627/quasar-weave/internal/model"
 )
+
+func (s *Store) SaveObservationBundle(ctx context.Context, observation model.Observation, action string) error {
+	raw, err := json.Marshal(observation)
+	if err != nil {
+		return fmt.Errorf("marshal observation bundle: %w", err)
+	}
+	now := time.Now().UTC().Format(time.RFC3339Nano)
+	return s.Transaction(ctx, func(tx *sql.Tx) error {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO records(kind, id, payload, updated_at) VALUES(?, ?, ?, ?) ON CONFLICT(kind, id) DO UPDATE SET payload=excluded.payload, updated_at=excluded.updated_at`, kindObservation, observation.ID, raw, now); err != nil {
+			return fmt.Errorf("save observation record: %w", err)
+		}
+		if _, err := tx.ExecContext(ctx, `INSERT INTO events(subject, action, payload, created_at) VALUES(?, ?, ?, ?)`, observation.ID, action, observation.Target, now); err != nil {
+			return fmt.Errorf("save observation event: %w", err)
+		}
+		return nil
+	})
+}
 
 func (s *Store) SaveObservation(ctx context.Context, observation model.Observation) error {
 	if err := validateEntity("observation", observation.ID); err != nil {

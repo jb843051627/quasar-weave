@@ -41,10 +41,10 @@ func (l *Lab) CreateObservation(ctx context.Context, input model.ObservationInpu
 	}
 	now := l.Now()
 	observation := model.Observation{ID: input.ID, Target: input.Target, RequestedBy: input.RequestedBy, Status: model.ObservationPlanned, ExpectedFrames: input.ExpectedFrames, GateID: input.GateID, Version: 1, CreatedAt: now, UpdatedAt: now}
-	if err := l.store.SaveObservation(ctx, observation); err != nil {
+	if err := l.store.SaveObservationBundle(ctx, observation, "observation.created"); err != nil {
 		return model.Observation{}, fmt.Errorf("save observation: %w", err)
 	}
-	return observation, l.record(ctx, observation.ID, "observation.created", observation.Target)
+	return observation, nil
 }
 
 func (l *Lab) GetObservation(ctx context.Context, id string) (model.Observation, error) {
@@ -106,7 +106,7 @@ func (l *Lab) FailObservation(ctx context.Context, id, reason string) (model.Obs
 }
 
 func (l *Lab) RecordFrameResult(ctx context.Context, observationID string, score float64) (model.Observation, error) {
-	observation, err := l.store.RecordObservationFrame(ctx, observationID, score, l.Now())
+	observation, err := l.recordFrameResult(ctx, observationID, score)
 	if err != nil {
 		return model.Observation{}, fmt.Errorf("record frame result: %w", err)
 	}

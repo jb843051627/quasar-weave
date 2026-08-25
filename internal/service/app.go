@@ -26,6 +26,7 @@ type Lab struct {
 	sequence  atomic.Uint64
 	closeOnce sync.Once
 	stateMu   sync.Mutex
+	frameMu   sync.Mutex
 	closed    chan struct{}
 }
 

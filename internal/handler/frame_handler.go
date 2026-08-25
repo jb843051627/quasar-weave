@@ -35,8 +35,14 @@ func (rt *Router) handleFrames(w http.ResponseWriter, r *http.Request, suffix st
 		}
 		if done != nil {
 			select {
-			case <-done:
+			case processingErr := <-done:
+				if processingErr != nil {
+					writeError(w, service.StatusCode(processingErr), processingErr)
+					return
+				}
 			case <-r.Context().Done():
+				writeError(w, http.StatusRequestTimeout, r.Context().Err())
+				return
 			}
 		}
 		writeJSON(w, http.StatusAccepted, item)

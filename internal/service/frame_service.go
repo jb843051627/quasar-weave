@@ -63,6 +63,9 @@ func (l *Lab) ListFrames(ctx context.Context, filter model.FrameFilter) ([]model
 }
 
 func (l *Lab) evaluateFrame(ctx context.Context, frame model.CalibrationFrame) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	if frame.ID == "" {
 		return nil
 	}
@@ -101,8 +104,14 @@ func (l *Lab) evaluateFrame(ctx context.Context, frame model.CalibrationFrame) e
 	if _, err := l.store.MarkFrame(ctx, frame.ID, state, reason, l.Now()); err != nil {
 		return err
 	}
-	_, err = l.store.RecordObservationFrame(ctx, frame.ObservationID, result.Score, l.Now())
+	_, err = l.recordFrameResult(ctx, frame.ObservationID, result.Score)
 	return err
+}
+
+func (l *Lab) recordFrameResult(ctx context.Context, observationID string, score float64) (model.Observation, error) {
+	l.frameMu.Lock()
+	defer l.frameMu.Unlock()
+	return l.store.RecordObservationFrame(ctx, observationID, score, l.Now())
 }
 
 func (l *Lab) EvaluateFrame(ctx context.Context, id string) (model.QualityResult, error) {
