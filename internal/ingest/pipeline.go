@@ -16,21 +16,32 @@ type Pipeline struct {
 	closed   bool
 	accepted int
 	failed   int
+	seen     map[string]struct{}
 }
 
 func NewPipeline(size, workers int) *Pipeline {
-	return &Pipeline{queue: NewWorkers(size, workers)}
+	return &Pipeline{queue: NewWorkers(size, workers), seen: make(map[string]struct{})}
 }
 
 func (p *Pipeline) Submit(ctx context.Context, frame model.CalibrationFrame, processor Processor) (<-chan error, error) {
 	if processor == nil {
 		return nil, fmt.Errorf("frame processor is required")
 	}
+	p.mu.Lock()
+	if _, exists := p.seen[frame.ID]; exists {
+		p.mu.Unlock()
+		return nil, model.ErrAlreadyExists
+	}
+	p.seen[frame.ID] = struct{}{}
+	p.mu.Unlock()
 	done := make(chan error, 1)
 	err := p.queue.Submit(ctx, Job{ID: frame.ID, Ctx: ctx, Done: done, Run: func(jobCtx context.Context) error {
 		return processor(jobCtx, frame)
 	}})
 	if err != nil {
+		p.mu.Lock()
+		delete(p.seen, frame.ID)
+		p.mu.Unlock()
 		return nil, err
 	}
 	p.mu.Lock()
