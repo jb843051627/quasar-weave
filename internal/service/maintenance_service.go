@@ -17,6 +17,9 @@ func (l *Lab) ReprocessObservation(ctx context.Context, id string) (int, error) 
 		return 0, fmt.Errorf("observation %s has no frames", id)
 	}
 	for _, frame := range frames {
+		if err := ctx.Err(); err != nil {
+			return 0, err
+		}
 		if err := l.evaluateFrame(ctx, frame); err != nil {
 			return 0, err
 		}

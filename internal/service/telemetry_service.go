@@ -31,6 +31,7 @@ func (l *Lab) RecordTelemetry(ctx context.Context, point model.TelemetryPoint) e
 	if err := l.store.SaveTelemetry(ctx, point); err != nil {
 		return err
 	}
+	l.telemetry.Add(point.Name, point.Value)
 	return l.record(ctx, point.AntennaID, "telemetry.recorded", point.Name)
 }
 

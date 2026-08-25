@@ -23,6 +23,7 @@ type Lab struct {
 	pipeline  *ingest.Pipeline
 	notify    *notify.Dispatcher
 	metrics   metrics.Counters
+	telemetry *metrics.Registry
 	sequence  atomic.Uint64
 	closeOnce sync.Once
 	stateMu   sync.Mutex
@@ -49,6 +50,7 @@ func NewLabWith(repository *store.Store, c clock.Clock, dispatcher *notify.Dispa
 		pipeline:  ingest.NewPipeline(64, 2),
 		notify:    dispatcher,
 		closed:    make(chan struct{}),
+		telemetry: metrics.NewRegistry(),
 	}
 	return lab
 }
@@ -62,6 +64,8 @@ func (l *Lab) Close() {
 }
 
 func (l *Lab) Store() *store.Store { return l.store }
+
+func (l *Lab) TelemetryMetric(name string) float64 { return l.telemetry.Get(name) }
 
 func (l *Lab) Now() time.Time { return l.clock.Now().UTC() }
 
