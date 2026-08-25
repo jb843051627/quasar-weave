@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/jb843051627/quasar-weave/internal/model"
@@ -64,6 +65,11 @@ func (l *Lab) ListFrames(ctx context.Context, filter model.FrameFilter) ([]model
 func (l *Lab) evaluateFrame(ctx context.Context, frame model.CalibrationFrame) error {
 	if frame.ID == "" {
 		return nil
+	}
+	if _, err := l.store.GetQualityResultByFrame(ctx, frame.ID); err == nil {
+		return nil
+	} else if !errors.Is(err, model.ErrNotFound) {
+		return fmt.Errorf("check existing quality result: %w", err)
 	}
 	observation, err := l.store.GetObservation(ctx, frame.ObservationID)
 	if err != nil {

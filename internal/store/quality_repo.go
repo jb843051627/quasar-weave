@@ -45,6 +45,19 @@ func (s *Store) SaveQualityResult(ctx context.Context, result model.QualityResul
 	return s.Save(ctx, kindResult, result.ID, result)
 }
 
+func (s *Store) GetQualityResultByFrame(ctx context.Context, frameID string) (model.QualityResult, error) {
+	items, err := listKind[model.QualityResult](ctx, s, kindResult)
+	if err != nil {
+		return model.QualityResult{}, err
+	}
+	for _, item := range items {
+		if item.FrameID == frameID {
+			return item, nil
+		}
+	}
+	return model.QualityResult{}, model.ErrNotFound
+}
+
 func (s *Store) ListQualityResults(ctx context.Context, observationID string) ([]model.QualityResult, error) {
 	items, err := listKind[model.QualityResult](ctx, s, kindResult)
 	if err != nil {

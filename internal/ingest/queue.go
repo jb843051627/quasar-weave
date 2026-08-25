@@ -9,6 +9,7 @@ import (
 
 type Job struct {
 	ID   string
+	Ctx  context.Context
 	Run  func(context.Context) error
 	Done chan error
 }
@@ -49,7 +50,11 @@ func (q *Queue) loop() {
 				q.finish(job, model.ErrQueueClosed)
 				continue
 			}
-			err := job.Run(context.Background())
+			jobCtx := job.Ctx
+			if jobCtx == nil {
+				jobCtx = context.Background()
+			}
+			err := job.Run(jobCtx)
 			q.finish(job, err)
 		case <-q.stop:
 			return
@@ -73,6 +78,9 @@ func (q *Queue) Submit(ctx context.Context, job Job) error {
 	q.mu.RUnlock()
 	if closed {
 		return model.ErrQueueClosed
+	}
+	if job.Ctx == nil {
+		job.Ctx = ctx
 	}
 	select {
 	case q.jobs <- job:

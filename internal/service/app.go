@@ -25,6 +25,7 @@ type Lab struct {
 	metrics   metrics.Counters
 	sequence  atomic.Uint64
 	closeOnce sync.Once
+	stateMu   sync.Mutex
 	closed    chan struct{}
 }
 

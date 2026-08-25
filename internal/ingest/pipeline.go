@@ -27,7 +27,7 @@ func (p *Pipeline) Submit(ctx context.Context, frame model.CalibrationFrame, pro
 		return nil, fmt.Errorf("frame processor is required")
 	}
 	done := make(chan error, 1)
-	err := p.queue.Submit(ctx, Job{ID: frame.ID, Done: done, Run: func(jobCtx context.Context) error {
+	err := p.queue.Submit(ctx, Job{ID: frame.ID, Ctx: ctx, Done: done, Run: func(jobCtx context.Context) error {
 		return processor(jobCtx, frame)
 	}})
 	if err != nil {

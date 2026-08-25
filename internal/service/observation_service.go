@@ -24,6 +24,18 @@ func (l *Lab) CreateObservation(ctx context.Context, input model.ObservationInpu
 	if input.ExpectedFrames <= 0 || input.ExpectedFrames > 100000 {
 		return model.Observation{}, fmt.Errorf("%w: expected_frames must be positive", ErrInvalidInput)
 	}
+	if input.GateID == "" {
+		return model.Observation{}, fmt.Errorf("%w: gate_id is required", ErrInvalidInput)
+	}
+	if _, err := l.store.GetGate(ctx, input.GateID); err != nil {
+		return model.Observation{}, fmt.Errorf("observation gate: %w", err)
+	}
+	if input.GateID == "" {
+		return model.Observation{}, fmt.Errorf("%w: gate_id is required", ErrInvalidInput)
+	}
+	if _, err := l.store.GetGate(ctx, input.GateID); err != nil {
+		return model.Observation{}, fmt.Errorf("observation gate: %w", err)
+	}
 	if _, err := l.store.GetObservation(ctx, input.ID); err == nil {
 		return model.Observation{}, fmt.Errorf("%w: observation %s already exists", ErrConflict, input.ID)
 	}
@@ -51,6 +63,8 @@ func (l *Lab) ListObservations(ctx context.Context, filter model.ObservationFilt
 }
 
 func (l *Lab) StartObservation(ctx context.Context, id string) (model.Observation, error) {
+	l.stateMu.Lock()
+	defer l.stateMu.Unlock()
 	observation, err := l.store.TransitionObservation(ctx, id, model.ObservationCapturing, l.Now(), "")
 	if err != nil {
 		return model.Observation{}, fmt.Errorf("start observation: %w", err)
@@ -59,6 +73,8 @@ func (l *Lab) StartObservation(ctx context.Context, id string) (model.Observatio
 }
 
 func (l *Lab) BeginCalibration(ctx context.Context, id string) (model.Observation, error) {
+	l.stateMu.Lock()
+	defer l.stateMu.Unlock()
 	observation, err := l.store.TransitionObservation(ctx, id, model.ObservationCalibrating, l.Now(), "")
 	if err != nil {
 		return model.Observation{}, fmt.Errorf("begin calibration: %w", err)
@@ -67,6 +83,8 @@ func (l *Lab) BeginCalibration(ctx context.Context, id string) (model.Observatio
 }
 
 func (l *Lab) ArchiveObservation(ctx context.Context, id string) (model.Observation, error) {
+	l.stateMu.Lock()
+	defer l.stateMu.Unlock()
 	observation, err := l.store.TransitionObservation(ctx, id, model.ObservationArchived, l.Now(), "operator archived")
 	if err != nil {
 		return model.Observation{}, fmt.Errorf("archive observation: %w", err)
@@ -78,6 +96,8 @@ func (l *Lab) FailObservation(ctx context.Context, id, reason string) (model.Obs
 	if err := validation.Text(reason, "reason", 3, 300); err != nil {
 		return model.Observation{}, fmt.Errorf("%w: %v", ErrInvalidInput, err)
 	}
+	l.stateMu.Lock()
+	defer l.stateMu.Unlock()
 	observation, err := l.store.TransitionObservation(ctx, id, model.ObservationFailed, l.Now(), reason)
 	if err != nil {
 		return model.Observation{}, fmt.Errorf("fail observation: %w", err)
