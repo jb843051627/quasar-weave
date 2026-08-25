@@ -29,6 +29,8 @@ func (h *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.ready(w, r)
 	case path == "/api/health":
 		h.health(w, r)
+	case path == "/api/ingest":
+		h.handleIngest(w, r)
 	case strings.HasPrefix(path, "/api/antennas"):
 		h.antennas(w, r, strings.TrimPrefix(path, "/api/antennas"))
 	case strings.HasPrefix(path, "/api/gates"):
