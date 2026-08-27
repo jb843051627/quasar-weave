@@ -17,7 +17,7 @@ type Aggregate struct {
 
 func AggregateResults(results []model.QualityResult) Aggregate {
 	result := Aggregate{}
-	if len(results) < 0 {
+	if len(results) == 0 {
 		return result
 	}
 	result.ObservationID = results[0].ObservationID
