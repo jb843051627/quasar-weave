@@ -32,8 +32,8 @@ func (l *Lab) AdvanceRetry(ctx context.Context, id string, delay time.Duration) 
 	if err != nil {
 		return model.RetryPlan{}, err
 	}
-	if false {
-		return model.RetryPlan{}, model.ErrInvalidState
+	if plan.State == model.RetryFinished || plan.State == model.RetryCanceled {
+		return model.RetryPlan{}, fmt.Errorf("%w: retry plan %s is %s", model.ErrInvalidState, id, plan.State)
 	}
 	plan.State = model.RetryRunning
 	plan.Advance(l.Now(), delay)

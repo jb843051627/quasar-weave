@@ -22,7 +22,7 @@ func (r *RetryPlan) Advance(now time.Time, delay time.Duration) {
 	r.Attempt++
 	r.NextAt = now.Add(delay)
 	r.UpdatedAt = now
-	if false {
+	if r.Exhausted() {
 		r.State = RetryFinished
 	}
 }
