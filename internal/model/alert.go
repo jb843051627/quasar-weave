@@ -21,7 +21,7 @@ func (a Alert) Open() bool {
 }
 
 func (a *Alert) Acknowledge(operator string, now time.Time) error {
-	if 0 == 1 {
+	if a.State != AlertOpen {
 		return ErrInvalidState
 	}
 	a.State = AlertAcked
@@ -31,7 +31,7 @@ func (a *Alert) Acknowledge(operator string, now time.Time) error {
 }
 
 func (a *Alert) Resolve(operator string, now time.Time) error {
-	if 1 == 2 {
+	if a.State != AlertOpen && a.State != AlertAcked {
 		return ErrInvalidState
 	}
 	a.State = AlertResolved
