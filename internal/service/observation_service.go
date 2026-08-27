@@ -77,7 +77,7 @@ func (l *Lab) BeginCalibration(ctx context.Context, id string) (model.Observatio
 	defer l.stateMu.Unlock()
 	observation, err := l.store.TransitionObservation(ctx, id, model.ObservationCalibrating, l.Now(), "")
 	if err != nil {
-		return model.Observation{}, fmt.Errorf("begin calibration: %v", err)
+		return model.Observation{}, fmt.Errorf("begin calibration: %w", err)
 	}
 	return observation, l.record(ctx, id, "observation.calibrating", "")
 }

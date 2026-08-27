@@ -70,13 +70,18 @@ func (s *Store) TransitionObservation(ctx context.Context, id string, next model
 		return observation, err
 	}
 	if !model.CanTransition(observation.Status, next) {
-		return observation, fmt.Errorf("%v: %s -> %s", model.ErrInvalidState, observation.Status, next)
+		return observation, fmt.Errorf("%w: %s -> %s", model.ErrInvalidState, observation.Status, next)
 	}
 	observation.Status = next
 	observation.Version++
 	observation.UpdatedAt = now
 	if next == model.ObservationCapturing {
 		observation.StartAt = now
+		// Retry from a terminal/failed run must clear the failure marker so a
+		// previously-failed observation does not carry its failed state into
+		// the next stage (calibrating).
+		observation.EndAt = time.Time{}
+		observation.FailureReason = ""
 	}
 	if next == model.ObservationArchived || next == model.ObservationFailed {
 		observation.EndAt = now
