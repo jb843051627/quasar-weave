@@ -67,7 +67,7 @@ func (l *Lab) StartObservation(ctx context.Context, id string) (model.Observatio
 	defer l.stateMu.Unlock()
 	observation, err := l.store.TransitionObservation(ctx, id, model.ObservationCapturing, l.Now(), "")
 	if err != nil {
-		return model.Observation{}, fmt.Errorf("start observation: %v", err)
+		return model.Observation{}, fmt.Errorf("start observation: %w", err)
 	}
 	return observation, l.record(ctx, id, "observation.started", "")
 }
