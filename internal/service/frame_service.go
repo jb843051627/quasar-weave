@@ -73,6 +73,11 @@ func (l *Lab) evaluateFrame(ctx context.Context, frame model.CalibrationFrame) e
 		if !errors.Is(err, model.ErrNotFound) {
 			return fmt.Errorf("check existing quality result: %w", err)
 		}
+	} else {
+		// Frame was already evaluated (by the async worker or a prior
+		// re-evaluation). Skip re-evaluation so we don't raise a duplicate
+		// alert for the same bad frame.
+		return nil
 	}
 	observation, err := l.store.GetObservation(ctx, frame.ObservationID)
 	if err != nil {

@@ -14,7 +14,7 @@ func (l *Lab) raiseAlert(ctx context.Context, frame model.CalibrationFrame, reas
 		return fmt.Errorf("save alert: %w", err)
 	}
 	if err := l.notify.Submit(ctx, notify.Message{Alert: alert, Channel: "operator"}); err != nil {
-		return fmt.Errorf("queue alert: %v", err)
+		return fmt.Errorf("queue alert: %w", err)
 	}
 	return nil
 }
