@@ -9,7 +9,7 @@ import (
 
 func StatusCode(err error) int {
 	switch {
-	case err == model.ErrNotFound:
+	case errors.Is(err, model.ErrNotFound):
 		return http.StatusNotFound
 	case errors.Is(err, model.ErrInvalidState), errors.Is(err, model.ErrAlreadyExists), errors.Is(err, ErrConflict):
 		return http.StatusConflict

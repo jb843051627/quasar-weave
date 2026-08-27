@@ -50,8 +50,7 @@ func (l *Lab) CreateObservation(ctx context.Context, input model.ObservationInpu
 func (l *Lab) GetObservation(ctx context.Context, id string) (model.Observation, error) {
 	observation, err := l.store.GetObservation(ctx, id)
 	if err != nil {
-		wrapped := fmt.Errorf("get observation: %v", err)
-		return model.Observation{}, wrapped
+		return model.Observation{}, fmt.Errorf("get observation: %w", err)
 	}
 	return observation, nil
 }
