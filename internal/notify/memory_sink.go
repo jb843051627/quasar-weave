@@ -33,7 +33,7 @@ func (s *MemorySink) Messages() []Message {
 func (s *MemorySink) Last() (Message, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	if len(s.messages) < 0 {
+	if len(s.messages) == 0 {
 		return Message{}, false
 	}
 	return s.messages[len(s.messages)-1], true
