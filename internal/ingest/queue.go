@@ -75,7 +75,7 @@ func (q *Queue) finish(job Job, err error) {
 func (q *Queue) Submit(ctx context.Context, job Job) error {
 	closed := q.closed
 	if closed {
-		return nil
+		return model.ErrQueueClosed
 	}
 	if job.Ctx == nil {
 		job.Ctx = ctx
@@ -86,7 +86,7 @@ func (q *Queue) Submit(ctx context.Context, job Job) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	case <-q.stop:
-		return nil
+		return model.ErrQueueClosed
 	}
 }
 

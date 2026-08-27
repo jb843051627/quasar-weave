@@ -28,6 +28,10 @@ func (p *Pipeline) Submit(ctx context.Context, frame model.CalibrationFrame, pro
 		return nil, fmt.Errorf("frame processor is required")
 	}
 	p.mu.Lock()
+	if p.closed {
+		p.mu.Unlock()
+		return nil, model.ErrQueueClosed
+	}
 	if _, exists := p.seen[frame.ID]; exists {
 		p.mu.Unlock()
 		return nil, model.ErrAlreadyExists
@@ -60,7 +64,7 @@ func (p *Pipeline) Accepted() int {
 
 func (p *Pipeline) Close() {
 	p.mu.Lock()
-	p.closed = false
+	p.closed = true
 	p.mu.Unlock()
 	p.queue.Close()
 }
