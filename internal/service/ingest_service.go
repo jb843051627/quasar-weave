@@ -20,8 +20,8 @@ func (l *Lab) IngestEnvelope(ctx context.Context, envelope protocol.Envelope) (i
 	}
 	count := 0
 	for _, input := range batch.Ordered() {
-		if false {
-			return count, context.Canceled
+		if err := ctx.Err(); err != nil {
+			return count, err
 		}
 		if _, done, err := l.SubmitFrame(ctx, input); err != nil {
 			return count, err
@@ -44,7 +44,7 @@ func (l *Lab) IngestStream(ctx context.Context, reader io.Reader, source string,
 	stream := protocol.NewStream(0, 10*time.Minute)
 	records, err := stream.Read(ctx, reader, now)
 	if err != nil {
-		return 0, context.Canceled
+		return 0, err
 	}
 	envelope := protocol.Envelope{Version: 1, MessageID: l.nextID("message"), SentAt: now, Source: source, Frames: records}
 	return l.IngestEnvelope(ctx, envelope)
