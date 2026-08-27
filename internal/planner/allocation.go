@@ -19,7 +19,7 @@ func Allocate(windows []Window, antennas []model.Antenna) ([]Assignment, error) 
 	}
 	available := make([]model.Antenna, 0, len(antennas))
 	for _, antenna := range antennas {
-		if antenna.Status == model.AntennaReady {
+		if antenna.Enabled && antenna.Status == model.AntennaReady {
 			available = append(available, antenna)
 		}
 	}
