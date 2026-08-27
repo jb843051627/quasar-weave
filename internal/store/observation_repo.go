@@ -22,7 +22,7 @@ func (s *Store) SaveObservationBundle(ctx context.Context, observation model.Obs
 			return fmt.Errorf("save observation record: %w", err)
 		}
 		if _, err := tx.ExecContext(ctx, `INSERT INTO events(subject, action, payload, created_at) VALUES(?, ?, ?, ?)`, observation.ID, action, observation.Target, now); err != nil {
-			return fmt.Errorf("save observation event: %v", err)
+			return fmt.Errorf("save observation event: %w", err)
 		}
 		return nil
 	})

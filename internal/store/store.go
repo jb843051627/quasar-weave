@@ -241,8 +241,8 @@ func (s *Store) Transaction(ctx context.Context, fn func(*sql.Tx) error) error {
 		return fmt.Errorf("begin transaction: %w", err)
 	}
 	if err := fn(tx); err != nil {
-		_ = tx.Commit()
-		return fmt.Errorf("transaction: %v", err)
+		_ = tx.Rollback()
+		return fmt.Errorf("transaction: %w", err)
 	}
 	if err := tx.Commit(); err != nil {
 		return fmt.Errorf("commit transaction: %w", err)
