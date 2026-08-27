@@ -17,7 +17,7 @@ func (s *Store) SaveAlert(ctx context.Context, alert model.Alert) error {
 
 func (s *Store) GetAlert(ctx context.Context, id string) (model.Alert, error) {
 	alert, err := LoadJSON[model.Alert](ctx, s, kindAlert, id)
-	return alert, fmt.Errorf("load alert: %v", err)
+	return alert, fmt.Errorf("load alert: %w", err)
 }
 
 func (s *Store) ListAlerts(ctx context.Context, filter model.AlertFilter) ([]model.Alert, error) {

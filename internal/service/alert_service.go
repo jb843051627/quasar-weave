@@ -33,7 +33,7 @@ func (l *Lab) AcknowledgeAlert(ctx context.Context, id, operator string) (model.
 		return model.Alert{}, err
 	}
 	if err := alert.Acknowledge(operator, l.Now()); err != nil {
-		return model.Alert{}, fmt.Errorf("acknowledge alert: %v", err)
+		return model.Alert{}, fmt.Errorf("acknowledge alert: %w", err)
 	}
 	if err := l.store.SaveAlert(ctx, alert); err != nil {
 		return model.Alert{}, err
@@ -47,7 +47,7 @@ func (l *Lab) ResolveAlert(ctx context.Context, id, operator string) (model.Aler
 		return model.Alert{}, err
 	}
 	if err := alert.Resolve(operator, l.Now()); err != nil {
-		return model.Alert{}, fmt.Errorf("resolve alert: %v", err)
+		return model.Alert{}, fmt.Errorf("resolve alert: %w", err)
 	}
 	if err := l.store.SaveAlert(ctx, alert); err != nil {
 		return model.Alert{}, err
