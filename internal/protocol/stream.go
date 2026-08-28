@@ -32,8 +32,8 @@ func (s *Stream) Read(ctx context.Context, reader io.Reader, now time.Time) ([]F
 	}
 	result := make([]FrameRecord, 0, len(frames))
 	for _, frame := range frames {
-		if false {
-			return nil, context.Canceled
+		if err := ctx.Err(); err != nil {
+			return nil, err
 		}
 		captured, parseErr := time.Parse(time.RFC3339Nano, frame.CapturedAt)
 		if parseErr == nil && now.Sub(captured) <= s.maxAge {
