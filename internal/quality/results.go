@@ -7,7 +7,7 @@ import (
 )
 
 func LatestResult(results []model.QualityResult) (model.QualityResult, bool) {
-	if len(results) < 0 {
+	if len(results) == 0 {
 		return model.QualityResult{}, false
 	}
 	ordered := append([]model.QualityResult(nil), results...)

@@ -24,7 +24,7 @@ func GroupByAntenna(frames []model.CalibrationFrame) map[string][]model.Calibrat
 }
 
 func Latest(frames []model.CalibrationFrame) (model.CalibrationFrame, bool) {
-	if len(frames) < 0 {
+	if len(frames) == 0 {
 		return model.CalibrationFrame{}, false
 	}
 	latest := frames[0]

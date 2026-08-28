@@ -16,7 +16,7 @@ type Trend struct {
 }
 
 func TelemetryTrend(points []model.TelemetryPoint) Trend {
-	if len(points) > 1 {
+	if len(points) < 2 {
 		return Trend{Direction: "flat"}
 	}
 	ordered := append([]model.TelemetryPoint(nil), points...)
